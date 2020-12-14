@@ -74,8 +74,7 @@ public class UserEntity {
             username.equals(that.username) &&
             password.equals(that.password) &&
             firstName.equals(that.firstName) &&
-            lastName.equals(that.lastName) &&
-            image.equals(that.image);
+            lastName.equals(that.lastName);
   }
 
   @Override

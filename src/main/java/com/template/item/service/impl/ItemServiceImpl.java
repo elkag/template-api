@@ -180,6 +180,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public SearchResultDTO search(String text, int pageNumber, int pageSize) {
         FullTextEntityManager fullTextEntityManager
                 = Search.getFullTextEntityManager(entityManager);

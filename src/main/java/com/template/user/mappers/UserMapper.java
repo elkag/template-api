@@ -9,7 +9,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class UserMapper {
 
     public static final UserMapper INSTANCE = Mappers.getMapper( UserMapper.class );

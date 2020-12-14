@@ -121,6 +121,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public UserModel validateAndLoginFacebookUser(String accessToken) {
 
        Map<String, Object> attributes = null;
