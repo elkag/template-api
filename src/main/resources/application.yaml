@@ -5,9 +5,9 @@ spring:
     #username: "${DB_USER:}"
     #password: "${DB_PASSWORD:}"
     ## Postgres
-    url: "jdbc:postgresql://localhost:5432/products_holder?serverTimezone=UTC&characterEncoding=UTF-8&sslMode=DISABLED"
-    username: "${POSTGRES_USER:docker}"
-    password: "${POSTGRES_PASSWORD:docker}"
+    url: "${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5432/products_holder?serverTimezone=UTC&characterEncoding=UTF-8&sslMode=DISABLED"
+    username: "${JDBC_DATABASE_USER:docker}"
+    password: "${JDBC_DATABASE_PASSWORD:docker}"
     continueOnError: true
     #driver-class-name: "com.mysql.cj.jdbc.Driver"
     driver-class-name: "org.postgresql.Driver"
@@ -63,6 +63,7 @@ app:
       - myandroidapp://oauth2/redirect
       - myiosapp://oauth2/redirect
 server:
+  port: ${PORT:8080}
   error:
     include-message: always
 logging:

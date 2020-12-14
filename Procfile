@@ -1,1 +1,1 @@
-web: java -jar build/libs/postgre.jar
+web: java -jar build/libs/template-api-1.0-SNAPSHOT.jar
