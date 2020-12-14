@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-roles-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: roles
+            constraintName: fk_role_user
+            onDelete: CASCADE
+            referencedColumnNames: id
+            referencedTableName: users
+            validate: true

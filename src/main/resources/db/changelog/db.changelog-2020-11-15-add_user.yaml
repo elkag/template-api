@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-user-table
+      author: Elka Ganeva
+      changes:
+        - insert:
+            catalogName: products_holder
+            columns:
+              - column:
+                  name: username
+                  value: "${ADMIN_USERNAME}"
+              - column:
+                  name: first_name
+                  value: admin
+              - column:
+                  name: last_name
+                  value: admin
+              - column:
+                  name: password
+                  value: "${ADMIN_PASSWORD}"
+            tableName: users

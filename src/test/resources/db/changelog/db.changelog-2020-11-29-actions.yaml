@@ -1,0 +1,59 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-actions-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: actions
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: session_id
+                  type: varchar(50)
+              - column:
+                  name: action
+                  type: varchar(50)
+              - column:
+                  name: user_id
+                  type: bigint
+              - column:
+                  name: ip
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: item_id
+                  type: bigint
+              - column:
+                  name: search
+                  type: varchar(255)
+              - column:
+                  name: datetime
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    insertable: false
+                    updatable: false
+                    nullable: false
+              - addForeignKeyConstraint:
+                  baseColumnNames: user_id
+                  baseTableName: actions
+                  constraintName: fk_action_user
+                  onDelete: CASCADE
+                  referencedColumnNames: id
+                  referencedTableName: users
+                  validate: true
+              - addForeignKeyConstraint:
+                  baseColumnNames: item_id
+                  baseTableName: actions
+                  constraintName: fk_action_item
+                  onDelete: CASCADE
+                  referencedColumnNames: id
+                  referencedTableName: items
+                  validate: true

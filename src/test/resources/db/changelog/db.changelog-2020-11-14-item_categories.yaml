@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-item-categories-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: item_categories
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: category_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: item_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseColumnNames: item_id
+            baseTableName: item_categories
+            constraintName: fk_item_category
+            referencedColumnNames: id
+            referencedTableName: items
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: category_id
+            baseTableName: item_categories
+            constraintName: fk_category_items
+            referencedColumnNames: id
+            referencedTableName: categories
+            validate: true

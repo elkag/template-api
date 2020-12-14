@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-categories-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: categories
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: categories
+            columns:
+              - column:
+                  name: name
+            indexName: idx_categories_name
+            unique: true

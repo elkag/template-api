@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-user-roles-table
+      author: Elka Ganeva
+      changes:
+        - insert:
+            catalogName: products_holder
+            columns:
+              - column:
+                  name: role
+                  value: SUPER_ADMIN
+              - column:
+                  name: user_id
+                  value: 1
+            tableName: roles
+        - insert:
+            catalogName: products_holder
+            columns:
+              - column:
+                  name: role
+                  value: ADMIN
+              - column:
+                  name: user_id
+                  value: 1
+            tableName: roles
+        - insert:
+            catalogName: products_holder
+            columns:
+              - column:
+                  name: role
+                  value: AUTHOR
+              - column:
+                  name: user_id
+                  value: 1
+            tableName: roles
+        - insert:
+            catalogName: products_holder
+            columns:
+              - column:
+                  name: role
+                  value: USER
+              - column:
+                  name: user_id
+                  value: 1
+            tableName: roles

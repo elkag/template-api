@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-user-table
+      author: Elka Ganeva
+      changes:
+        - insert:
+            catalogName: public
+            columns:
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: username
+                  value: super_admin
+              - column:
+                  name: first_name
+                  value: admin
+              - column:
+                  name: last_name
+                  value: admin
+              - column:
+                  name: password
+                  value: admin
+            tableName: users

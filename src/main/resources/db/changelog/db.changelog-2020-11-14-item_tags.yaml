@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-tag-items-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: item_tags
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: tag_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: item_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseColumnNames: tag_id
+            baseTableName: item_tags
+            constraintName: fk_tag_items
+            referencedColumnNames: id
+            referencedTableName: tags
+            validate: true
+        - addForeignKeyConstraint:
+            baseColumnNames: item_id
+            baseTableName: item_tags
+            constraintName: fk_item_tags
+            referencedColumnNames: id
+            referencedTableName: items
+            validate: true
