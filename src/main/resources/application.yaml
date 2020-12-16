@@ -1,15 +1,9 @@
 spring:
   datasource:
-    ## MYSQL
-    #url: "jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/products_holder?serverTimezone=UTC&characterEncoding=UTF-8&sslMode=DISABLED&createDatabaseIfNotExist=true"
-    #username: "${DB_USER:}"
-    #password: "${DB_PASSWORD:}"
-    ## Postgres
-    url: "${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5432/products_holder?serverTimezone=UTC&characterEncoding=UTF-8&sslMode=DISABLED}"
-    username: "${JDBC_DATABASE_USER:docker}"
-    password: "${JDBC_DATABASE_PASSWORD:docker}"
+    url: "${JDBC_DATABASE_URL:}"
+    username: "${JDBC_DATABASE_USER:}"
+    password: "${JDBC_DATABASE_PASSWORD:}"
     continueOnError: true
-    #driver-class-name: "com.mysql.cj.jdbc.Driver"
     driver-class-name: "org.postgresql.Driver"
     platform: postgres
     hikari:
@@ -66,6 +60,11 @@ server:
   port: ${PORT:8080}
   error:
     include-message: always
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 logging:
   level:
     - root: TRACE

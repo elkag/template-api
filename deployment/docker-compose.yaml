@@ -1,0 +1,36 @@
+version: '3.3'
+services:
+  template-api:
+    image: elkag/template-api:v1
+    container_name: template-api
+    ports:
+      - "8080:8080"
+    networks:
+      - template-postgres
+    environment:
+      - JDBC_DATABASE_URL=jdbc:postgresql://db:5432/products_holder?serverTimezone=UTC&characterEncoding=UTF-8&sslMode=DISABLED
+    env_file:
+      - environment.env
+    depends_on:
+      - db
+    volumes:
+      - logs:/logs
+  db:
+    image: postgres
+    container_name: postgres
+    networks:
+      - template-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=products_holder
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+networks:
+  template-postgres:
+volumes:
+  logs:
+  pgdata:
+
