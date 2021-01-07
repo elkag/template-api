@@ -16,24 +16,15 @@ databaseChangeLog:
               - column:
                   name: name
                   type: varchar(255)
-                  constraints:
-                    nullable: false
               - column:
                   name: description
-                  type: varchar(255)
+                  type: varchar(1000)
               - column:
                   name: notes
-                  type: varchar(600)
-              - column:
-                  name: image
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
+                  type: TEXT
               - column:
                   name: link
                   type: varchar(255)
-                  constraints:
-                    nullable: false
               - column:
                   name: approved
                   type: boolean

@@ -1,5 +1,6 @@
 package com.template.config;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 public class AppProperties {
     private final Auth auth = new Auth();
     private final OAuth2 oauth2 = new OAuth2();
+    private final Cloudinary cloudinary = new Cloudinary();
 
     public static class Auth {
         private String tokenSecret;
@@ -44,6 +46,18 @@ public class AppProperties {
         }
     }
 
+    @Data
+    public static final class Cloudinary {
+
+        private String key;
+        private String cloud;
+        private String secret;
+
+    }
+
+    public Cloudinary getCloudinary() {
+        return cloudinary;
+    }
     public Auth getAuth() {
         return auth;
     }
@@ -51,4 +65,6 @@ public class AppProperties {
     public OAuth2 getOauth2() {
         return oauth2;
     }
+
+
 }

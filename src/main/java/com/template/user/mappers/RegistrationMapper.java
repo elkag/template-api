@@ -19,7 +19,6 @@ public abstract class RegistrationMapper {
 
     @Mappings({
             @Mapping(target = "username", source = "email"),
-            @Mapping(target = "roles", source = "role", qualifiedByName = "mapRole"),
             @Mapping(target = "password", source = "password", qualifiedByName = "hashPassword")
     })
     public abstract UserEntity toUser(RegistrationModel model);

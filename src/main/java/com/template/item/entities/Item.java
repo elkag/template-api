@@ -1,6 +1,7 @@
 package com.template.item.entities;
 
 import com.template.category.entity.Category;
+import com.template.image.entities.Image;
 import com.template.tag.entity.Tag;
 import com.template.user.entities.UserEntity;
 import lombok.Getter;
@@ -12,7 +13,9 @@ import org.hibernate.search.annotations.IndexedEmbedded;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -27,23 +30,20 @@ public class Item {
 
     @Field
     @Column(name="name", nullable = false)
-    @NotNull(message = "Name can not be null")
+    @Size(max=100)
     private String name;
 
     @Field
     @Column(name="description")
+    @Size(max=1000, message = "Item description must be between 0 and 1000 characters")
     private String description;
 
     @Field
     @Column(name="notes")
     private String notes;
 
-    @Column(name="image", nullable = false)
-    @NotNull(message = "Image can not be null")
-    private String image;
-
     @Column(name="link", nullable = false)
-    @NotNull(message = "Link can not be null")
+    @Size(max=100)
     private String link;
 
     @Field
@@ -77,5 +77,6 @@ public class Item {
                     foreignKey = @ForeignKey(name = "fk_tag_items"))})
     private Set<Tag> tags;
 
-
+    @Transient
+    private List<Image> images;
 }

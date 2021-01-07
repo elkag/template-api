@@ -1,7 +1,6 @@
 package com.template.config.security;
 
 import com.template.user.RestAuthenticationEntryPoint;
-import com.template.user.entities.Authority;
 import com.template.user.service.impl.UserDetailsServiceImpl;
 import com.template.config.security.jwt.JWTAuthorizationFilter;
 import lombok.AllArgsConstructor;
@@ -74,8 +73,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
   }
-
-
 
   @Override
   public void configure(final WebSecurity web) {

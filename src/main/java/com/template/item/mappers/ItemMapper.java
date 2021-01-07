@@ -19,7 +19,6 @@ public abstract class ItemMapper {
 
     public abstract Item toItem(ItemDTO model);
 
-    // Categories mapping
     @Named("mapToString")
     protected String categoryToString(Category category){
         return category.getName();
@@ -32,6 +31,7 @@ public abstract class ItemMapper {
     protected Category stringToCategory(String catString){
         return new Category(catString);
     }
+
     @IterableMapping(qualifiedByName = "mapToCategory")
     protected abstract Set<Category> categoriesToStrings(Set<String> categories);
 
@@ -48,6 +48,7 @@ public abstract class ItemMapper {
     protected Tag stringToTag(String tagName){
         return new Tag(tagName);
     }
+
     @IterableMapping(qualifiedByName = "mapToTag")
     protected abstract Set<Tag> tagsToStrings(Set<String> tags);
 

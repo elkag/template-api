@@ -24,6 +24,10 @@ public class RoleMatchValidator implements ConstraintValidator<RoleMatch, Object
         BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(value);
         Object roleObj = wrapper.getPropertyValue(role);
 
+        if(roleObj == null) {
+            return true;
+        }
+
         boolean valid = Arrays.stream(Authority.values()).anyMatch(a -> a.name().equals(roleObj));
 
         if(!valid) {

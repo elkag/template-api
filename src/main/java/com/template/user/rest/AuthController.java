@@ -1,5 +1,7 @@
 package com.template.user.rest;
 
+import com.template.user.entities.UserPrincipal;
+import com.template.user.mappers.UserMapper;
 import com.template.user.model.LoginModel;
 import com.template.user.service.UserService;
 import com.template.config.security.SecurityConstants;
@@ -8,11 +10,13 @@ import com.template.user.model.UserModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,10 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.security.Principal;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/users")
+@Validated
 public class AuthController {
 
    private final UserService userService;
@@ -62,18 +66,19 @@ public class AuthController {
         // Call facebook's API to validate id_token and get user's details
         final UserModel userModel = userService.validateAndLoginFacebookUser(token);
 
-       // final String jwtToken = tokenProvider.createToken(userModel.getUsername());
+        final String jwtToken = tokenProvider.createToken(userModel.getUsername());
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Headers", "x-token");
         headers.set("Access-Control-Expose-Headers", "x-token");
-       // headers.set("x-token", jwtToken);
+        headers.set("x-token", jwtToken);
 
         return new ResponseEntity<>(headers, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAuthority('AUTHOR')")
     @PostMapping("/validate")
-    public UserModel validateUser(@AuthenticationPrincipal Principal principal) {
-        return userService.getUserDTO(principal.getName());
+    public ResponseEntity<UserModel> validate(@AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(UserMapper.INSTANCE.toModel(principal.getUserEntity()));
     }
 }

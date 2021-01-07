@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
         first = "password",
         second = "repeatPassword",
         message = "Password do not match")
-@RoleMatch(role = "role", message = "Invalid user role")
+//@RoleMatch(role = "role", message = "Invalid user role")
 public class RegistrationModel {
 
     @NotNull
@@ -30,7 +30,4 @@ public class RegistrationModel {
 
     @NotNull
     private String repeatPassword;
-
-    @NotNull
-    private String role;
 }

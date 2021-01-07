@@ -1,24 +1,27 @@
 package com.template.exceptions;
 
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+import java.util.Collections;
+import java.util.List;
+
+
+@Getter
 public class Error {
-    public String errorName;
-    public String errorDescription;
+    protected final HttpStatus status;
+    protected final String message;
+    protected final List<String> errors;
 
-    public String getErrorName() {
-        return errorName;
+    public Error(HttpStatus status, String message, List<String> errors) {
+        this.status = status;
+        this.message = message;
+        this.errors = errors;
     }
 
-    public String getErrorDescription() {
-        return errorDescription;
-    }
-
-    public Error setErrorName(String errorName) {
-        this.errorName = errorName;
-        return this;
-    }
-
-    public Error setErrorDescription(String errorDescription) {
-        this.errorDescription = errorDescription;
-        return this;
+    public Error(HttpStatus status, String message, String error) {
+        this.status = status;
+        this.message = message;
+        errors = Collections.singletonList(error);
     }
 }

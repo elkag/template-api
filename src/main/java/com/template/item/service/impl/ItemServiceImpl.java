@@ -1,17 +1,19 @@
 package com.template.item.service.impl;
 
-import com.template.category.entity.Category;
 import com.template.exceptions.HttpUnauthorizedException;
+import com.template.image.dto.ImageDto;
+import com.template.image.entities.Image;
+import com.template.image.mapper.ImageMapper;
+import com.template.image.service.ImageService;
 import com.template.item.entities.Item;
 import com.template.item.entities.ItemRepository;
 import com.template.item.mappers.ItemMapper;
+import com.template.item.models.ApproveItemRequest;
 import com.template.item.models.ItemDTO;
 import com.template.item.models.PageDTO;
 import com.template.item.models.SearchResultDTO;
 import com.template.item.service.AddItemService;
 import com.template.item.service.ItemService;
-import com.template.tag.entity.Tag;
-import com.template.user.entities.Authority;
 import com.template.user.entities.UserEntity;
 import com.template.user.entities.UserPrincipal;
 import lombok.extern.log4j.Log4j2;
@@ -39,19 +41,24 @@ public class ItemServiceImpl implements ItemService {
 
     private final AddItemService addItemService;
     private final EntityManager entityManager;
+    private final ImageService imageService;
 
     public ItemServiceImpl(ItemRepository itemRepository,
                            AddItemService addItemService,
+                           ImageService imageService,
                            EntityManager entityManager) {
 
         this.itemRepository = itemRepository;
         this.addItemService = addItemService;
+        this.imageService = imageService;
         this.entityManager = entityManager;
     }
 
     @Override
     public ItemDTO addItem(final ItemDTO model, final UserEntity user) {
         Item item = addItemService.addItem(model, user);
+        List<Image> saved = imageService.addImages(item, model.getImages());
+        item.setImages(saved);
         return ItemMapper.INSTANCE.toItemDTO(item);
     }
 
@@ -68,6 +75,7 @@ public class ItemServiceImpl implements ItemService {
                     principal.getUserEntity().getId(), id));
             throw new HttpUnauthorizedException("Unauthorized request");
         }
+        imageService.deleteAll(itemOpt.get());
         itemRepository.delete(itemOpt.get());
 
         log.info(String.format("USER_%s: Delete item END: {} -> %d", principal.getUserEntity().getId(), id));
@@ -79,7 +87,10 @@ public class ItemServiceImpl implements ItemService {
         log.info(String.format("USER_1: Delete item BEGIN: {} -> %s", id));
         itemRepository.findById(id)
                 .ifPresentOrElse(
-                        itemRepository::delete,
+                        (item) -> {
+                            imageService.deleteAll(item);
+                            itemRepository.delete(item);
+                        },
                         () -> {
                             throw new EntityNotFoundException("Item entity does not exist");
                         }
@@ -90,26 +101,25 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDTO updateItem(ItemDTO model, UserPrincipal principal) throws EntityNotFoundException {
+    public ItemDTO updateItem(ItemDTO model, UserEntity userEntity) throws EntityNotFoundException {
 
-        log.info(String.format("USER_%s: Update item BEGIN: {} ->", principal.getUserEntity().getId()));
-        Optional<Item> itemOpt = itemRepository.fetchFullDataById(model.getId());
-        if(itemOpt.isEmpty()){
-            throw new EntityNotFoundException();
-        }
+        log.info(String.format("USER_%s: Update item BEGIN: {} ->", userEntity.getId()));
+        Item updated = addItemService.updateItem(model, userEntity);
+        List<Image> images = imageService.getImages(updated);
+        // TODO: get images, delete
+        // ...
+        List<String> publicIds = model.getImages().stream().map(ImageDto::getPublicId).collect(Collectors.toList());
+        images.forEach(img -> {
+            if(!publicIds.contains(img.getPublicId())) {
+                imageService.destroyImages(img);
+            }
+        });
 
-        Item item = itemOpt.get();
-        boolean isSuperAdmin = principal.getAuthorities().stream()
-                .anyMatch(g -> g.getAuthority().equals(Authority.SUPER_ADMIN.name()));
-        boolean isOwner = item.getUser().equals(principal.getUserEntity());
-        if(!isSuperAdmin && !isOwner) {
-            log.error(String.format("USER_%s: is not allowed to edit item: %d",
-                   principal.getUserEntity().getId(), item.getId()));
-            throw new HttpUnauthorizedException("Unauthorized request");
-        }
-        Item updated = updateItem(item, model);
+        List<Image> updatedImages = imageService.getImages(updated);
+        updated.setImages(updatedImages);
         ItemDTO itemDTO = ItemMapper.INSTANCE.toItemDTO(updated);
-        log.info(String.format("USER_%s: Update item END: {} ->", principal.getUserEntity().getId()), itemDTO);
+
+        log.info(String.format("USER_%s: Update item END: {} ->", userEntity.getId()), itemDTO);
         return itemDTO;
     }
 
@@ -146,18 +156,40 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
-    public ItemDTO approve(long id) {
-        // Optional<Item> itemOpt1 = itemRepository.fetchById(id);
-        if(!itemRepository.existsById(id)){
-            throw new EntityNotFoundException();
-        }
-        itemRepository.approve(id);
-        entityManager.clear();
-        Optional<Item> itemOpt = itemRepository.fetchById(id);
-        Item updated = itemOpt.orElseThrow(EntityNotFoundException::new);
-        return ItemMapper.INSTANCE.toItemDTO(updated);
+    public PageDTO getAll(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Item> page = itemRepository.fetchAll(pageable);
+
+        return PageDTO.builder()
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .result(ItemMapper.INSTANCE.toItemDTOs(page.stream().collect(Collectors.toSet())))
+                .build();
     }
+
+    @Override
+    @Transactional
+    public Set<ItemDTO> approve(Set<ApproveItemRequest> request) {
+
+        List<Long> approved = request.stream()
+                .filter(ApproveItemRequest::getIsApproved)
+                .map(ApproveItemRequest::getId)
+                .collect(Collectors.toList());
+        List<Long> disapproved = request.stream()
+                .filter(i -> !i.getIsApproved())
+                .map(ApproveItemRequest::getId)
+                .collect(Collectors.toList());
+
+        itemRepository.approve(approved, true);
+        itemRepository.approve(disapproved, false);
+
+        Set<Long> ids = request.stream().map(ApproveItemRequest::getId).collect(Collectors.toSet());
+        Set<Item> items = itemRepository.fetchByIds(ids);
+
+        return ItemMapper.INSTANCE.toItemDTOs(items);
+    }
+
+
 
     @Override
     public ItemDTO getItem(long id) {
@@ -175,7 +207,37 @@ public class ItemServiceImpl implements ItemService {
         if(!item.isApproved()){
             throw new HttpUnauthorizedException(String.format("%d is not approved", item.getId()));
         }
+
         return ItemMapper.INSTANCE.toItemDTO(item);
+    }
+
+    @Override
+    public ItemDTO getAuthorsItemById(long id, UserEntity user) {
+        Optional<Item> itemOpt = itemRepository.fetchFullDataById(id);
+        Item item = itemOpt.orElseThrow(EntityNotFoundException::new);
+
+        List<Image> images = imageService.getImages(item);
+        item.setImages(images);
+
+        return ItemMapper.INSTANCE.toItemDTO(item);
+    }
+
+    @Override
+    public Set<ItemDTO> getAuthorsItems(UserEntity user) {
+        Set<Item> items = itemRepository.fetchAuthorsItems(user);
+
+        List<Long> ids = items.stream().map(Item::getId).collect(Collectors.toList());
+
+        List<Image> images = imageService.getImages(ids);
+
+        Set<ItemDTO> itemDTOS = ItemMapper.INSTANCE.toItemDTOs(items);
+        itemDTOS.forEach(item ->
+                item.setImages(images.stream()
+                        .filter(i -> i.getItem().getId().equals(item.getId()))
+                        .map(ImageMapper.INSTANCE::toImageDto)
+                        .collect(Collectors.toList())));
+
+        return itemDTOS;
     }
 
     @Override
@@ -219,17 +281,9 @@ public class ItemServiceImpl implements ItemService {
                 .result(resultSet).build();
     }
 
-    private Item updateItem(Item item, ItemDTO model) {
-
-        item.setName(model.getName());
-        item.setDescription(model.getDescription());
-        item.setLink(model.getLink());
-        item.setNotes(model.getNotes());
-        item.setImage(model.getImage());
-        item.setTags(model.getTags().stream().map(Tag::new).collect(Collectors.toSet()));
-        item.setCategories(model.getCategories().stream().map(Category::new).collect(Collectors.toSet()));
-
-        return addItemService.saveItem(item);
+    @Override
+    public Optional<Item> getById(Long itemId) {
+        return itemRepository.findById(itemId);
     }
 
 }

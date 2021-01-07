@@ -66,6 +66,8 @@ dependencies {
     compileOnly group: 'org.mapstruct', name: 'mapstruct-processor', version: mapstructVersion
     annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: mapstructVersion
     compile 'org.hibernate:hibernate-search-orm:5.11.7.Final'
+    compile group: 'com.cloudinary', name: 'cloudinary-http44', version: '1.5.0'
+    compile group: 'com.cloudinary', name: 'cloudinary-taglib', version: '1.5.0'
 
     implementation 'org.liquibase:liquibase-core'
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.18'

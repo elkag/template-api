@@ -1,5 +1,6 @@
 package com.template.user.service.impl;
 
+import com.template.user.entities.Authority;
 import com.template.user.mappers.RegistrationMapper;
 import com.template.user.model.RegistrationModel;
 import com.template.user.oauth2.OAuth2UserInfo;
@@ -72,8 +73,9 @@ public class UserServiceImpl implements UserService {
         userEntity.setFirstName(userInfo.getFirstName());
         userEntity.setLastName(userInfo.getLastName());
 
-        AuthorityEntity userRole = new AuthorityEntity().setRole("ROLE_USER");
-        userEntity.setRoles(List.of(userRole));
+        AuthorityEntity userRoleAuthor = new AuthorityEntity().setRole(Authority.USER.name());
+        AuthorityEntity userRoleUser = new AuthorityEntity().setRole(Authority.AUTHOR.name());
+        userEntity.setRoles(List.of(userRoleUser, userRoleAuthor));
 
         return userRepository.save(userEntity);
     }
@@ -113,6 +115,11 @@ public class UserServiceImpl implements UserService {
         if(userOpt.isPresent()) {
             throw new HttpBadRequestException(String.format("Email {%s} already exists", user.getUsername()));
         }
+
+        AuthorityEntity userRoleAuthor = new AuthorityEntity().setRole(Authority.USER.name());
+        AuthorityEntity userRoleUser = new AuthorityEntity().setRole(Authority.AUTHOR.name());
+        user.setRoles(List.of(userRoleUser, userRoleAuthor));
+
         final UserEntity saved = userRepository.save(user);
 
         log.info("Create user END: {}", saved);
@@ -145,5 +152,4 @@ public class UserServiceImpl implements UserService {
             throw new HttpBadRequestException(exp.getMessage());
         }
     }
-
 }

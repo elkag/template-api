@@ -43,6 +43,10 @@ spring:
           authorizationUri: https://www.facebook.com/v3.0/dialog/oauth
           tokenUri: https://graph.facebook.com/v3.0/oauth/access_token
           userInfoUri: https://graph.facebook.com/v3.0/me?fields=id,first_name,middle_name,last_name,name,email,verified,is_verified,picture.width(250).height(250)
+  servlet:
+    multipart:
+      max-file-size: 5242880
+      max-request-size: 5242880
 app:
   auth:
     tokenSecret: ${TOKEN_SECRET:926D96C90030DD58429D2751AC1BDBBC}
@@ -57,6 +61,10 @@ app:
       - myandroidapp://oauth2/redirect
       - myiosapp://oauth2/redirect
 server:
+  tomcat:
+    max-http-form-post-size: 5242880
+    max-http-post-size: 5242880
+    max-swallow-size: 5242880
   port: ${PORT:8080}
   error:
     include-message: always
@@ -68,3 +76,7 @@ management:
 logging:
   level:
     - root: TRACE
+cloudinary:
+  cloud: dr9xzujkh
+  secret: kpMU94DCL6XN7BovzdJ93JUHYh8
+  key: 325681524322856

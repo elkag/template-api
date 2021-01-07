@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-images-table
+      author: Elka Ganeva
+      changes:
+        - createTable:
+            tableName: images
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: url
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: public_id
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: thumb
+                  type: varchar(100)
+              - column:
+                  name: item_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - addForeignKeyConstraint:
+                  baseColumnNames: item_id
+                  baseTableName: images
+                  constraintName: fk_image_item
+                  onDelete: CASCADE
+                  referencedColumnNames: id
+                  referencedTableName: items
+                  validate: true

@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/items")
@@ -24,12 +24,16 @@ public class ItemController extends BaseItemController {
     @GetMapping("/get")
     public ResponseEntity<ItemDTO> get(@RequestParam("id") long id) {
 
-        try {
-            ItemDTO response = itemService.getApprovedById(id);
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException ex) {
-            return ResponseEntity.noContent().build();
-        }
+        ItemDTO response = itemService.getApprovedById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAuthority('AUTHOR')")
+    @GetMapping("/get-author-item")
+    public ResponseEntity<ItemDTO> getAuthorItem(@RequestParam("id") long id, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        ItemDTO response = itemService.getAuthorsItemById(id, userPrincipal.getUserEntity());
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAuthority('AUTHOR')")
@@ -38,6 +42,14 @@ public class ItemController extends BaseItemController {
 
         ItemDTO response = itemService.addItem(model, userPrincipal.getUserEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PreAuthorize("hasAuthority('AUTHOR')")
+    @GetMapping("/get-author-items")
+    public ResponseEntity<Set<ItemDTO>> getAuthorItems(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Set<ItemDTO> response = itemService.getAuthorsItems(userPrincipal.getUserEntity());
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PreAuthorize("hasAuthority('AUTHOR')")
@@ -51,12 +63,7 @@ public class ItemController extends BaseItemController {
     @PreAuthorize("hasAuthority('AUTHOR')")
     @PutMapping("/update")
     public ResponseEntity<?> updateItem(@RequestBody final ItemDTO model, @AuthenticationPrincipal final UserPrincipal principal) {
-        ItemDTO response;
-        try{
-            response = itemService.updateItem(model, principal);
-        } catch (EntityNotFoundException ex){
-            return ResponseEntity.noContent().build();
-        }
+        ItemDTO response = itemService.updateItem(model, principal.getUserEntity());
         return ResponseEntity.ok(response);
     }
 
