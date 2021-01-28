@@ -1,4 +1,4 @@
-package com.template.user.model;
+package com.template.user.models;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -7,14 +7,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = FieldMatchValidator.class)
+@Constraint(validatedBy = RoleMatchValidator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface FieldMatch {
+public @interface RoleMatch {
 
     String message() default "";
-    String first();
-    String second();
+    String role();
 
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

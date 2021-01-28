@@ -3,6 +3,7 @@ package com.template.logger.entities;
 import com.template.item.entities.Item;
 import com.template.logger.rest.interceptors.ActionType;
 import com.template.user.entities.UserEntity;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.template.user.mappers;
 
-import com.template.user.model.RegistrationModel;
+import com.template.user.models.RegistrationRequest;
 import com.template.config.security.PasswordEncoder;
 import com.template.user.entities.Authority;
 import com.template.user.entities.AuthorityEntity;
@@ -21,7 +21,7 @@ public abstract class RegistrationMapper {
             @Mapping(target = "username", source = "email"),
             @Mapping(target = "password", source = "password", qualifiedByName = "hashPassword")
     })
-    public abstract UserEntity toUser(RegistrationModel model);
+    public abstract UserEntity toUser(RegistrationRequest model);
 
 
     @Named("mapRole")

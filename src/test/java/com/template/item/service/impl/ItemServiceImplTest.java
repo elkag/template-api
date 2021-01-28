@@ -10,7 +10,6 @@ import com.template.item.service.ItemService;
 import com.template.item.utils.ItemServiceTestUtils;
 import com.template.user.entities.Authority;
 import com.template.user.entities.UserEntity;
-import com.template.user.entities.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,7 +78,7 @@ class ItemServiceImplTest {
 
         when(mockItemRepository.findById(1L)).thenReturn(Optional.of(item));
 
-        assertDoesNotThrow(() -> itemService.deleteItem(1L, new UserPrincipal(user)));
+        assertDoesNotThrow(() -> itemService.deleteItem(1L, user));
     }
 
     @Test
@@ -95,7 +94,7 @@ class ItemServiceImplTest {
         when(mockItemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         assertThrows(HttpUnauthorizedException.class,
-                () -> itemService.deleteItem(1L, new UserPrincipal(usersMap.get(Authority.ADMIN))));
+                () -> itemService.deleteItem(1L, usersMap.get(Authority.ADMIN)));
     }
 
     @Test

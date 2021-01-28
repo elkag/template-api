@@ -1,7 +1,7 @@
 package com.template.item.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.template.config.HibernateSearchConfig;
+import com.template.config.lucene.HibernateSearchConfig;
 import com.template.config.SpringSecurityTestConfig;
 import com.template.item.models.ItemDTO;
 import com.template.item.utils.ItemServiceTestUtils;
@@ -71,7 +71,6 @@ class AdminItemControllerTest extends ItemControllerTestBase {
                 andExpect(jsonPath("$.name", is(itemDTO.getName()))).
                 andExpect(jsonPath("$.description", is(itemDTO.getDescription()))).
                 andExpect(jsonPath("$.notes", is(itemDTO.getNotes()))).
-                andExpect(jsonPath("$.image", is(itemDTO.getImage()))).
                 andExpect(jsonPath("$.categories", hasSize(2))).
                 andExpect(jsonPath("$.tags", hasSize(2))).
                 andExpect(jsonPath("$.approved", is(true)));

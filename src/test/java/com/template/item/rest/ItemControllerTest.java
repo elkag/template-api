@@ -1,7 +1,7 @@
 package com.template.item.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.template.config.HibernateSearchConfig;
+import com.template.config.lucene.HibernateSearchConfig;
 import com.template.config.SpringSecurityTestConfig;
 import com.template.item.mappers.ItemMapper;
 import com.template.item.models.ItemDTO;

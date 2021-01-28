@@ -1,19 +1,17 @@
 package com.template.item.rest;
 
-import com.cloudinary.utils.ObjectUtils;
-import com.template.config.CloudinaryConfig;
 import com.template.item.models.PageDTO;
-import com.template.item.models.SearchResultDTO;
 import com.template.item.service.AddItemService;
 import com.template.item.service.ItemService;
-import com.template.user.entities.UserPrincipal;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+@Validated
 public class BaseItemController {
     protected final ItemService itemService;
     protected final AddItemService addItemService;
@@ -23,26 +21,28 @@ public class BaseItemController {
         this.addItemService = addItemService;
     }
 
-    public ResponseEntity<PageDTO> getApproved(@RequestParam("p") int page,
-                                               @RequestParam("s") int size) {
-
+    public ResponseEntity<PageDTO> getApproved(
+            @RequestParam("p")
+            @NotNull(message = "Page number (p) must not be null.")
+            @Min(value = 0, message="Page number (p) must be equal or greater than 0.")
+            @ApiParam(
+                    name =  "p",
+                    type = "Integer",
+                    value = "Page number.\n" +
+                            "Starts from 0 - [0, 1, ..., n]",
+                    example = "1",
+                    required = true
+            ) int page,
+            @RequestParam("s")
+            @NotNull(message = "Content size (s) must not be null.")
+            @Min(value = 1, message="Content size (s) must be equal or greater than 1.")
+            @ApiParam(
+                    name =  "s",
+                    type = "Integer",
+                    value = "Count of the rows in the page",
+                    example = "10",
+                    required = true
+            ) int size) {
         return ResponseEntity.ok(itemService.getApproved(page, size));
     }
-
-    @GetMapping("/search")
-    public ResponseEntity<SearchResultDTO> search(@RequestParam("t") String text,
-                                                @RequestParam("p") int page,
-                                                @RequestParam("s") int size) {
-        SearchResultDTO response = itemService.search(text, page, size);
-        return ResponseEntity.ok(response);
-    }
-
-    @PreAuthorize("hasAuthority('AUTHOR')")
-    @PostMapping("/new")
-    public ResponseEntity<Long> createNewEmptyItem(@AuthenticationPrincipal final UserPrincipal principal) {
-        Long response = addItemService.createEmptyItem(principal.getUserEntity());
-        return ResponseEntity.ok(response);
-    }
-
-
 }

@@ -28,11 +28,11 @@ public class SpringSecurityTestConfig {
         SUPER_ADMIN.setFirstName("superadmin");
         SUPER_ADMIN.setLastName("superadmin");
 
-        SUPER_ADMIN.setRoles(List.of(
+        SUPER_ADMIN.setRoles(
                 new AuthorityEntity(Authority.SUPER_ADMIN.name()),
                 new AuthorityEntity(Authority.ADMIN.name()),
                 new AuthorityEntity(Authority.AUTHOR.name()),
-                new AuthorityEntity(Authority.USER.name())));
+                new AuthorityEntity(Authority.USER.name()));
         userRepository.save(SUPER_ADMIN);
 
         ADMIN = new UserEntity();
@@ -41,10 +41,10 @@ public class SpringSecurityTestConfig {
         ADMIN.setFirstName("admin");
         ADMIN.setLastName("admin");
 
-        ADMIN.setRoles(List.of(
+        ADMIN.setRoles(
                 new AuthorityEntity(Authority.ADMIN.name()),
                 new AuthorityEntity(Authority.AUTHOR.name()),
-                new AuthorityEntity(Authority.USER.name())));
+                new AuthorityEntity(Authority.USER.name()));
         userRepository.save(ADMIN);
 
         AUTHOR = new UserEntity();
@@ -53,9 +53,9 @@ public class SpringSecurityTestConfig {
         AUTHOR.setFirstName("author");
         AUTHOR.setLastName("author");
 
-        AUTHOR.setRoles(List.of(
+        AUTHOR.setRoles(
                 new AuthorityEntity(Authority.AUTHOR.name()),
-                new AuthorityEntity(Authority.USER.name())));
+                new AuthorityEntity(Authority.USER.name()));
         userRepository.save(AUTHOR);
 
         return new UserDetailsServiceImpl(userRepository);

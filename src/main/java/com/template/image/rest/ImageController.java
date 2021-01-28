@@ -3,6 +3,7 @@ package com.template.image.rest;
 import com.template.image.dto.ImageDto;
 import com.template.image.service.ImageService;
 import com.template.user.entities.UserPrincipal;
+import io.swagger.annotations.Api;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/images")
+@Api(value="users", tags = {"Image controller"})
 public class ImageController {
 
 

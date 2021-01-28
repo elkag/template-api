@@ -15,5 +15,5 @@ public interface ImageService {
     void deleteAll(Item item);
     ImageDto upload(byte[] image, Long itemId);
 
-    void destroyImages(Image image);
+    void destroyImage(Image image);
 }

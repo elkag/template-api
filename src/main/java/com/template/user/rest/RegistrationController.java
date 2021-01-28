@@ -1,9 +1,11 @@
 package com.template.user.rest;
 
-import com.template.user.model.RegistrationModel;
+import com.template.user.models.RegistrationRequest;
+import com.template.user.models.UserDTO;
 import com.template.user.service.UserService;
 import com.template.config.security.TokenProvider;
-import com.template.user.model.UserModel;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/register")
+@Api(value="users", tags = {"Registration controller"})
 public class RegistrationController {
 
     private final UserService userService;
@@ -26,10 +29,11 @@ public class RegistrationController {
         this.tokenProvider = tokenProvider;
     }
 
+    @ApiOperation(value = "Register a new user")
     @PostMapping("/user")
-    public ResponseEntity<Void> registerUser(@Valid @RequestBody final RegistrationModel registrationModel) {
+    public ResponseEntity<Void> registerUser(@Valid @RequestBody final RegistrationRequest registrationRequest) {
 
-        final UserModel registered = userService.registerUser(registrationModel);
+        final UserDTO registered = userService.registerUser(registrationRequest);
 
         final String jwtToken = tokenProvider.createToken(registered.getUsername());
 

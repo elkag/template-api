@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-column-ban-to-users-table
+      author: Elka Ganeva
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  afterColumn: deleted
+                  name: banned
+                  type: boolean
+                  defaultValueComputed: FALSE

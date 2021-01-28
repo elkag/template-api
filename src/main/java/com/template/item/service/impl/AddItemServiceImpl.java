@@ -17,6 +17,7 @@ import com.template.user.entities.UserEntity;
 import lombok.extern.log4j.Log4j2;
 import org.postgresql.util.PSQLException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,31 +88,32 @@ public class AddItemServiceImpl implements AddItemService {
     }
 
     @Override
-    public Item updateItem(ItemDTO model, UserEntity userEntity) {
-        log.info(String.format("USER_%s: Add item BEGIN: {} -> ", userEntity.getId()), model);
+    public Item updateItem(ItemDTO model, UserEntity itemOwner) {
+        log.info(String.format("USER_%s: Add item BEGIN: {} -> ", itemOwner.getId()), model);
 
         Item item = ItemMapper.INSTANCE.toItem(model);
 
-        if(Objects.isNull(model.getId()) || itemRepository.findById(model.getId()).isEmpty()){
-            log.warn(String.format("USER_%d: -> ITEM_%d does not exist", userEntity.getId(), model.getId()));
+        if(Objects.isNull(model.getId())){
+            log.warn(String.format("USER_%d: -> ITEM_%d does not exist", itemOwner.getId(), model.getId()));
             throw new EntityNotFoundException();
         }
 
-
-        Optional<Item> itemOpt = itemRepository.findById(model.getId());
+        Optional<Item> itemOpt = itemRepository.fetchById(model.getId());
         if(itemOpt.isEmpty()){
             throw new EntityNotFoundException();
         }
 
         Item toUpdate = itemOpt.get();
 
-        boolean isOwner = toUpdate.getUser().equals(userEntity);
+        boolean isOwner = toUpdate.getUser().equals(itemOwner);
         if(!isOwner) {
             log.error(String.format("USER_%s: is not allowed to edit item: %d",
-                    userEntity.getId(), itemOpt.get().getId()));
-            throw new HttpUnauthorizedException("Unauthorized request");
+                    itemOwner.getId(), itemOpt.get().getId()));
+            if(!itemOpt.get().getUser().getId().equals(itemOwner.getId())) {
+                throw new AccessDeniedException("You have not permission to edit this item.");
+            }
         }
-        boolean isAdmin = userEntity.getRoles().stream()
+        boolean isAdmin = itemOwner.getRoles().stream()
                 .anyMatch(r -> r.getAuthority().equals(Authority.ADMIN.name()));
 
         toUpdate.setApproved(isAdmin);
@@ -126,7 +128,7 @@ public class AddItemServiceImpl implements AddItemService {
 
         Item saved = saveItem(toUpdate);
 
-        log.info(String.format("USER_%s: Add item END: {} -> ", userEntity.getId()), saved);
+        log.info(String.format("USER_%s: Add item END: {} -> ", itemOwner.getId()), saved);
         return saved;
     }
 

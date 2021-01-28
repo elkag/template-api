@@ -4,12 +4,15 @@ import com.template.category.entity.Category;
 import com.template.item.entities.Item;
 import com.template.item.models.ItemDTO;
 import com.template.tag.entity.Tag;
+import com.template.user.entities.Authority;
+import com.template.user.entities.AuthorityEntity;
+import com.template.user.mappers.UserMapper;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.Set;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = UserMapper.class)
 public abstract class ItemMapper {
     public static final ItemMapper INSTANCE = Mappers.getMapper( ItemMapper.class );
 
@@ -51,5 +54,6 @@ public abstract class ItemMapper {
 
     @IterableMapping(qualifiedByName = "mapToTag")
     protected abstract Set<Tag> tagsToStrings(Set<String> tags);
+
 
 }

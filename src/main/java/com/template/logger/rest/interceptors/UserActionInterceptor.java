@@ -1,6 +1,6 @@
 package com.template.logger.rest.interceptors;
 
-import com.template.config.AppProperties;
+import com.template.config.application.properties.AppProperties;
 import com.template.logger.service.LogService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;

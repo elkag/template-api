@@ -9,8 +9,11 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -60,8 +63,11 @@ public class UserEntity {
   @Column(name = "deleted", nullable = false)
   private boolean deleted;
 
-  public UserEntity setRoles(List<AuthorityEntity> roles) {
-    this.roles = roles;
+  @Column(name = "banned", nullable = false)
+  private boolean banned;
+
+  public UserEntity setRoles(AuthorityEntity ...userRoles) {
+    this.roles = Arrays.asList(userRoles);
     return this;
   }
 
@@ -72,13 +78,20 @@ public class UserEntity {
     UserEntity that = (UserEntity) o;
     return id.equals(that.id) &&
             username.equals(that.username) &&
-            password.equals(that.password) &&
             firstName.equals(that.firstName) &&
             lastName.equals(that.lastName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, username, password, firstName, lastName, image);
+    return Objects.hash(id, username, firstName, lastName, image);
+  }
+
+  public UserEntity addRole(final AuthorityEntity role) {
+    if(this.roles.stream().filter(r -> r.getRole().equals(role.getRole())).findAny().isEmpty()){
+      role.setUser(this);
+      this.roles.add(role);
+    }
+    return this;
   }
 }

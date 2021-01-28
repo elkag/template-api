@@ -3,17 +3,18 @@ package com.template.item.service.impl;
 import com.template.exceptions.HttpUnauthorizedException;
 import com.template.image.dto.ImageDto;
 import com.template.image.entities.Image;
-import com.template.image.mapper.ImageMapper;
 import com.template.image.service.ImageService;
 import com.template.item.entities.Item;
 import com.template.item.entities.ItemRepository;
 import com.template.item.mappers.ItemMapper;
-import com.template.item.models.ApproveItemRequest;
-import com.template.item.models.ItemDTO;
-import com.template.item.models.PageDTO;
-import com.template.item.models.SearchResultDTO;
+import com.template.item.mappers.ShortItemMapper;
+import com.template.item.models.*;
+import com.template.search.utils.OrderDirection;
+import com.template.search.utils.ItemsOrder;
 import com.template.item.service.AddItemService;
 import com.template.item.service.ItemService;
+import com.template.user.entities.Authority;
+import com.template.user.entities.AuthorityEntity;
 import com.template.user.entities.UserEntity;
 import com.template.user.entities.UserPrincipal;
 import lombok.extern.log4j.Log4j2;
@@ -25,11 +26,14 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,22 +67,22 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public boolean deleteItem(final long id, final UserPrincipal principal) throws EntityNotFoundException {
+    public boolean deleteItem(final long id, final UserEntity user) throws EntityNotFoundException {
 
-        log.info(String.format("USER_%s: Delete item BEGIN: {} -> %d", principal.getUserEntity().getId(), id));
-        Optional<Item> itemOpt = itemRepository.findById(id);
+        log.info(String.format("USER_%s: Delete item BEGIN: {} -> %d", user.getId(), id));
+        Optional<Item> itemOpt = itemRepository.fetchAuthorsItemById(id);
         if(itemOpt.isEmpty()){
             throw new EntityNotFoundException("Item entity not found.");
         }
-        if(!principal.getUserEntity().equals(itemOpt.get().getUser())){
+        if(!user.equals(itemOpt.get().getUser())){
             log.warn(String.format("USER_%s: is not allowed to delete item: %d",
-                    principal.getUserEntity().getId(), id));
+                    user.getId(), id));
             throw new HttpUnauthorizedException("Unauthorized request");
         }
         imageService.deleteAll(itemOpt.get());
         itemRepository.delete(itemOpt.get());
 
-        log.info(String.format("USER_%s: Delete item END: {} -> %d", principal.getUserEntity().getId(), id));
+        log.info(String.format("USER_%s: Delete item END: {} -> %d", user.getId(), id));
         return true;
     }
 
@@ -106,12 +110,11 @@ public class ItemServiceImpl implements ItemService {
         log.info(String.format("USER_%s: Update item BEGIN: {} ->", userEntity.getId()));
         Item updated = addItemService.updateItem(model, userEntity);
         List<Image> images = imageService.getImages(updated);
-        // TODO: get images, delete
-        // ...
+
         List<String> publicIds = model.getImages().stream().map(ImageDto::getPublicId).collect(Collectors.toList());
         images.forEach(img -> {
             if(!publicIds.contains(img.getPublicId())) {
-                imageService.destroyImages(img);
+                imageService.destroyImage(img);
             }
         });
 
@@ -139,64 +142,91 @@ public class ItemServiceImpl implements ItemService {
         return PageDTO.builder()
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
-                .result(ItemMapper.INSTANCE.toItemDTOs(page.stream().collect(Collectors.toSet())))
+                .result(ShortItemMapper.INSTANCE.toItemDTOs(page.stream().collect(Collectors.toList())))
                 .build();
     }
 
     @Override
     public PageDTO getNotApproved(int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Item> page = itemRepository.fetchUnapproved(pageable);
+        Page<Item> page = itemRepository.fetchNotApproved(pageable);
 
         return PageDTO.builder()
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
-                .result(ItemMapper.INSTANCE.toItemDTOs(page.stream().collect(Collectors.toSet())))
+                .result(ShortItemMapper.INSTANCE.toItemDTOs(page.stream().collect(Collectors.toList())))
                 .build();
     }
 
     @Override
-    public PageDTO getAll(int pageNumber, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    public PageDTO getAll(int pageNumber, int pageSize, String order, String direction) {
+
+        if(order == null) {
+            order = ItemsOrder.USER.name();
+            direction = OrderDirection.ASC.name();
+        } else {
+            order = order.toUpperCase();
+            direction = direction.toUpperCase();
+        }
+        Pageable pageable;
+        if(direction.equals(OrderDirection.ASC.name())) {
+            if(order.equals(ItemsOrder.USER.name())) {
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by("user.firstName").and(Sort.by("user.lastName").and(Sort.by("id"))));
+            } else {
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by(ItemsOrder.valueOf(order).getOrderBy()).ascending().and(Sort.by("id")));
+            }
+        } else {
+            if(order.equals(ItemsOrder.USER.name())) {
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by("user.firstName").descending().and(Sort.by("user.lastName").descending().and(Sort.by("id")).descending()));
+            } else {
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by(ItemsOrder.valueOf(order).getOrderBy()).descending().and(Sort.by("id")).descending());
+            }
+        }
         Page<Item> page = itemRepository.fetchAll(pageable);
 
         return PageDTO.builder()
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
-                .result(ItemMapper.INSTANCE.toItemDTOs(page.stream().collect(Collectors.toSet())))
+                .result(ShortItemMapper.INSTANCE.toItemDTOs(page.stream().collect(Collectors.toList())))
                 .build();
     }
 
-    @Override
     @Transactional
-    public Set<ItemDTO> approve(Set<ApproveItemRequest> request) {
+    @Override
+    public Set<ItemDTO> approve(UserPrincipal principal, Set<ApproveItemRequest> itemRequestSet) {
+        boolean isSuperAdmin = principal.getUserEntity().getRoles().stream()
+                .map(AuthorityEntity::getRole)
+                .anyMatch((r -> r.equals(Authority.SUPER_ADMIN.name())));
+        boolean isAdmin = principal.getUserEntity().getRoles().stream()
+                .map(AuthorityEntity::getRole)
+                .anyMatch((r -> r.equals(Authority.ADMIN.name())));
 
-        List<Long> approved = request.stream()
-                .filter(ApproveItemRequest::getIsApproved)
-                .map(ApproveItemRequest::getId)
-                .collect(Collectors.toList());
-        List<Long> disapproved = request.stream()
-                .filter(i -> !i.getIsApproved())
-                .map(ApproveItemRequest::getId)
-                .collect(Collectors.toList());
+        if(isSuperAdmin) {
+            itemRequestSet.forEach(itemRequest -> {
+                itemRepository.setApproved(itemRequest.getId(), itemRequest.getIsApproved());
+            });
+        } else if(isAdmin){
+            itemRequestSet.forEach(itemRequest -> {
+                itemRepository.setApproved(principal.getUserEntity().getId(), itemRequest.getId(), itemRequest.getIsApproved());
+            });
+        } else {
+            throw new HttpUnauthorizedException("You have not authorized to approve items.");
+        }
+        Set<Long> ids = itemRequestSet.stream().map(ApproveItemRequest::getId).collect(Collectors.toSet());
 
-        itemRepository.approve(approved, true);
-        itemRepository.approve(disapproved, false);
-
-        Set<Long> ids = request.stream().map(ApproveItemRequest::getId).collect(Collectors.toSet());
         Set<Item> items = itemRepository.fetchByIds(ids);
 
         return ItemMapper.INSTANCE.toItemDTOs(items);
     }
 
-
-
     @Override
     public ItemDTO getItem(long id) {
         Optional<Item> itemOpt = itemRepository.fetchById(id);
-        if(itemOpt.isEmpty()){
-            throw new EntityNotFoundException();
-        }
+        Item item = itemOpt.orElseThrow(EntityNotFoundException::new);
+
+        List<Image> images = imageService.getImages(item);
+        item.setImages(images);
+
         return ItemMapper.INSTANCE.toItemDTO(itemOpt.get());
     }
 
@@ -212,9 +242,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDTO getAuthorsItemById(long id, UserEntity user) {
-        Optional<Item> itemOpt = itemRepository.fetchFullDataById(id);
+    public ItemDTO getAuthorsItemById(long id, UserEntity owner) {
+        Optional<Item> itemOpt = itemRepository.fetchById(id);
         Item item = itemOpt.orElseThrow(EntityNotFoundException::new);
+
+        if(!itemOpt.get().getUser().getId().equals(owner.getId())) {
+            throw new AccessDeniedException("You have not permission to edit this item.");
+        }
 
         List<Image> images = imageService.getImages(item);
         item.setImages(images);
@@ -223,21 +257,35 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Set<ItemDTO> getAuthorsItems(UserEntity user) {
-        Set<Item> items = itemRepository.fetchAuthorsItems(user);
+    public PageDTO getAuthorItems(UserEntity user, int pageNumber, int pageSize, String order, String direction) {
+        if(order == null) {
+            order = ItemsOrder.USER.name();
+            direction = OrderDirection.ASC.name();
+        } else {
+            order = order.toUpperCase();
+            direction = direction.toUpperCase();
+        }
+        Pageable pageable;
+        if(direction.equals(OrderDirection.ASC.name())) {
+            if(order.equals(ItemsOrder.USER.name())) {
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by("user.firstName").and(Sort.by("user.lastName").and(Sort.by("id"))));
+            } else {
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by(ItemsOrder.valueOf(order).getOrderBy()).ascending().and(Sort.by("id")));
+            }
+        } else {
+            if(order.equals(ItemsOrder.USER.name())) {
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by("user.firstName").descending().and(Sort.by("user.lastName").descending().and(Sort.by("id")).descending()));
+            } else {
+                pageable = PageRequest.of(pageNumber, pageSize, Sort.by(ItemsOrder.valueOf(order).getOrderBy()).descending().and(Sort.by("id")).descending());
+            }
+        }
+        Page<Item> page = itemRepository.fetchAuthorsItems(user, pageable);
 
-        List<Long> ids = items.stream().map(Item::getId).collect(Collectors.toList());
-
-        List<Image> images = imageService.getImages(ids);
-
-        Set<ItemDTO> itemDTOS = ItemMapper.INSTANCE.toItemDTOs(items);
-        itemDTOS.forEach(item ->
-                item.setImages(images.stream()
-                        .filter(i -> i.getItem().getId().equals(item.getId()))
-                        .map(ImageMapper.INSTANCE::toImageDto)
-                        .collect(Collectors.toList())));
-
-        return itemDTOS;
+        return PageDTO.builder()
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .result(ShortItemMapper.INSTANCE.toItemDTOs(page.stream().collect(Collectors.toList())))
+                .build();
     }
 
     @Override
@@ -267,7 +315,7 @@ public class ItemServiceImpl implements ItemService {
                 = fullTextEntityManager.createFullTextQuery(query, Item.class);
 
         int count = fullTextQuery.getResultList().size();
-        fullTextQuery.setFirstResult((pageNumber - 1) * pageSize);
+        fullTextQuery.setFirstResult(pageNumber * pageSize);
         fullTextQuery.setMaxResults(pageSize);
 
         //returns JPA managed entities mapped to DTO
@@ -286,4 +334,14 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.findById(itemId);
     }
 
+    @Override
+    @Transactional
+    public void deleteItemsBefore(LocalDateTime now) {
+        log.info("Delete items BEGIN: {}", this);
+        Set<Item> toDeleteSet = itemRepository.selectOlderThan(now);
+        toDeleteSet.forEach(imageService::deleteAll);
+
+        int deletedCount = itemRepository.deleteIn(toDeleteSet.stream().map(Item::getId).collect(Collectors.toSet()));
+        log.info("Delete {} items END", deletedCount);
+    }
 }

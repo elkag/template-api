@@ -1,7 +1,7 @@
 package com.template.image.service;
 
 import com.cloudinary.utils.ObjectUtils;
-import com.template.config.CloudinaryConfig;
+import com.template.config.cloudinary.CloudinaryConfig;
 import com.template.image.dto.ImageDto;
 import com.template.image.entities.Image;
 import com.template.image.entities.ImageRepository;
@@ -56,19 +56,20 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void deleteImages(Item item, List<ImageDto> imageDtos) {
-        log.info(String.format("Delete %d images from ITEM_%d BEGIN: {} -> %s", imageDtos.size(), item.getId(), imageDtos));
+        log.info("Delete {} images from ITEM_{} BEGIN", imageDtos.size(), item.getId());
 
         List<Long> ids = imageDtos.stream().map(ImageDto::getId).collect(Collectors.toList());
         List<Image> images = imageRepository.fetchImagesByItem(item).stream()
                 .filter(img -> ids.contains(img.getId()))
                 .collect(Collectors.toList());
         imageRepository.deleteAll(images);
-        log.info(String.format("Delete %d images for ITEM_%d END: {} -> %s", imageDtos.size(), item.getId(), imageDtos));
+        log.info("Delete {} images from ITEM_{} BEGIN", imageDtos.size(), item.getId());
     }
 
     @Override
     public void deleteAll(Item item) {
         List<Image> images = imageRepository.fetchImagesByItem(item);
+        images.forEach(this::destroyImage);
         imageRepository.deleteAll(images);
     }
 
@@ -93,7 +94,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void destroyImages(Image image) {
+    public void destroyImage(Image image) {
         cloudinary.destroy(image.getPublicId(),
                 ObjectUtils.asMap("resourcetype", "auto"));
 

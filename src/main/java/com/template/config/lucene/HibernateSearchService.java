@@ -1,4 +1,4 @@
-package com.template.config;
+package com.template.config.lucene;
 
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;

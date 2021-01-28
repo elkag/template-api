@@ -3,7 +3,7 @@ package com.template.user.mappers;
 import com.template.config.security.PasswordEncoder;
 import com.template.user.entities.AuthorityEntity;
 import com.template.user.entities.UserEntity;
-import com.template.user.model.UserModel;
+import com.template.user.models.UserDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -18,12 +18,14 @@ public abstract class UserMapper {
             @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRole"),
             @Mapping(target = "password", source = "password", qualifiedByName = "hashPassword")
     })
-    public abstract UserEntity toUser(UserModel model);
+    public abstract UserEntity toUser(UserDTO model);
 
     @Mappings({
             @Mapping(target = "password", source = "password", ignore = true)
     })
-    public abstract UserModel toModel(UserEntity user);
+    public abstract UserDTO toModel(UserEntity user);
+
+    public abstract List<UserDTO> toUserDTOs(List<UserEntity> users);
 
     @IterableMapping(qualifiedByName = "mapStringArrToRoles")
     protected abstract List<AuthorityEntity> mapRoles(List<String> roles);

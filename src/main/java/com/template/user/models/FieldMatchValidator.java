@@ -1,4 +1,4 @@
-package com.template.user.model;
+package com.template.user.models;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;

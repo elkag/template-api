@@ -1,6 +1,5 @@
 package com.template.config.security;
 
-import com.template.user.RestAuthenticationEntryPoint;
 import com.template.user.service.impl.UserDetailsServiceImpl;
 import com.template.config.security.jwt.JWTAuthorizationFilter;
 import lombok.AllArgsConstructor;
@@ -16,10 +15,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static com.template.config.security.SecurityConstants.USERS_LOGIN_URL;
-import static com.template.config.security.SecurityConstants.USERS_REGISTER_URL;
+import static com.template.config.security.SecurityConstants.*;
 
 @AllArgsConstructor
 @Configuration
@@ -60,16 +59,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .formLogin().disable()
         .httpBasic().disable()
             .exceptionHandling()
-              .authenticationEntryPoint(new RestAuthenticationEntryPoint())
-              .and()
+            .accessDeniedHandler(new CustomAccessDeniedHandler())
+            .authenticationEntryPoint(new RestAuthenticationEntryPoint())
+            .and()
         .authorizeRequests()
             .antMatchers(HttpMethod.POST, USERS_LOGIN_URL, USERS_REGISTER_URL)
-              .permitAll()
-            .antMatchers(HttpMethod.GET)
-              .permitAll()
-            .antMatchers("/auth/**")
-              .permitAll()
-            .anyRequest().authenticated();
+            .permitAll()
+            .antMatchers(HttpMethod.GET, GET_ITEM_URL, GET_ALL_ITEMS_URL, SEARCH_ITEMS_URL, SWAGGER_UI_URL)
+            .permitAll()
+            .anyRequest().authenticated()
+            .and().sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
     http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
   }
@@ -77,7 +77,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   public void configure(final WebSecurity web) {
     web.ignoring().antMatchers(
-        "/users/**",
         "/configuration/ui",
         "/configuration/**",
         "/actuator/**",
@@ -86,4 +85,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         "/swagger-ui.html",
         "/webjars/**");
   }
+
+  // Used by spring security if CORS is enabled.
+ /* @Bean
+  public CorsFilter corsFilter() {
+    UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowCredentials(true);
+    config.addAllowedOrigin("*");
+    config.addAllowedHeader("*");
+    config.addAllowedMethod("*");
+    source.registerCorsConfiguration("/**", config);
+    return new CorsFilter(source);
+  }*/
 }

@@ -1,4 +1,4 @@
-package com.template.config;
+package com.template.config.lucene;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

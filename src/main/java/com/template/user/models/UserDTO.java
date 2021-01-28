@@ -1,15 +1,16 @@
-package com.template.user.model;
+package com.template.user.models;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @RoleMatch(role = "role", message = "Invalid user role")
-public class UserModel {
+public class UserDTO {
 
   private Long id;
 
@@ -20,6 +21,10 @@ public class UserModel {
 
   private String lastName;
 
+  private LocalDateTime registrationDate;
+
+  private Boolean banned;
+
   @ToString.Exclude
   private String username;
 
@@ -29,16 +34,24 @@ public class UserModel {
     return id;
   }
 
-  public UserModel setId(Long id) {
+  public UserDTO setId(Long id) {
     this.id = id;
     return this;
+  }
+
+  public LocalDateTime getRegistrationDate() {
+    return registrationDate;
+  }
+
+  public void setRegistrationDate(LocalDateTime registrationDate) {
+    this.registrationDate = registrationDate;
   }
 
   public String getPassword() {
     return password;
   }
 
-  public UserModel setPassword(String password) {
+  public UserDTO setPassword(String password) {
     this.password = password;
     return this;
   }
@@ -47,7 +60,7 @@ public class UserModel {
     return firstName;
   }
 
-  public UserModel setFirstName(String firstName) {
+  public UserDTO setFirstName(String firstName) {
     this.firstName = firstName;
     return this;
   }
@@ -56,7 +69,7 @@ public class UserModel {
     return lastName;
   }
 
-  public UserModel setLastName(String lastName) {
+  public UserDTO setLastName(String lastName) {
     this.lastName = lastName;
     return this;
   }
@@ -65,7 +78,7 @@ public class UserModel {
     return username;
   }
 
-  public UserModel setUsername(String username) {
+  public UserDTO setUsername(String username) {
     this.username = username;
     return this;
   }
@@ -74,8 +87,17 @@ public class UserModel {
     return roles;
   }
 
-  public UserModel setRoles(List<String> roles) {
+  public UserDTO setRoles(List<String> roles) {
     this.roles = roles;
+    return this;
+  }
+
+  public Boolean getBanned() {
+    return banned;
+  }
+
+  public UserDTO setBanned(Boolean banned) {
+    this.banned = banned;
     return this;
   }
 }

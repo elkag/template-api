@@ -26,7 +26,6 @@ public class ItemServiceTestUtils {
     public static ItemDTO getItemDTO(){
         ItemDTO itemDTO = new ItemDTO();
         itemDTO.setName("Item 1");
-        itemDTO.setImage("http://image.link");
         itemDTO.setLink("http://link.to");
         itemDTO.setDescription("Item description 1");
         itemDTO.setNotes("Item notes 1");
@@ -39,7 +38,6 @@ public class ItemServiceTestUtils {
         Item item = new Item();
         item.setName("Item name");
         item.setDescription("Item description");
-        item.setImage("http://image.url");
         item.setLink("http://link.url");
         item.setCategories(Set.of(new Category("cat 1"), new Category("cat 2")));
         item.setTags(Set.of(new Tag("tag 1"), new Tag("tag 2")));
@@ -53,7 +51,6 @@ public class ItemServiceTestUtils {
             item.setId(i + 1L);
             item.setName("Item " + i);
             item.setDescription("Item description " + i);
-            item.setImage("http://image" + i + ".url");
             item.setNotes("Item notes " + i);
             item.setLink("http://link.url");
             item.setApproved(true);
@@ -69,7 +66,6 @@ public class ItemServiceTestUtils {
             item.setId(i + 1L);
             item.setName("Item " + i);
             item.setDescription("Item description " + i);
-            item.setImage("http://image" + i + ".url");
             item.setNotes("Item notes " + i);
             item.setLink("http://link.url");
             item.setApproved(false);
@@ -87,11 +83,11 @@ public class ItemServiceTestUtils {
         superAdmin.setFirstName("Super");
         superAdmin.setLastName("Admin");
 
-        superAdmin.setRoles(List.of(
+        superAdmin.setRoles(
                 new AuthorityEntity(Authority.SUPER_ADMIN.name()),
                 new AuthorityEntity(Authority.ADMIN.name()),
                 new AuthorityEntity(Authority.AUTHOR.name()),
-                new AuthorityEntity(Authority.USER.name())));
+                new AuthorityEntity(Authority.USER.name()));
         return superAdmin;
     }
 
@@ -103,10 +99,10 @@ public class ItemServiceTestUtils {
         admin.setFirstName("Admin");
         admin.setLastName("Admin");
 
-        admin.setRoles(List.of(
+        admin.setRoles(
                 new AuthorityEntity(Authority.ADMIN.name()),
                 new AuthorityEntity(Authority.AUTHOR.name()),
-                new AuthorityEntity(Authority.USER.name())));
+                new AuthorityEntity(Authority.USER.name()));
         return admin;
     }
 
@@ -118,9 +114,9 @@ public class ItemServiceTestUtils {
         author.setFirstName("Author");
         author.setLastName("Author");
 
-        author.setRoles(List.of(
+        author.setRoles(
                 new AuthorityEntity(Authority.AUTHOR.name()),
-                new AuthorityEntity(Authority.USER.name())));
+                new AuthorityEntity(Authority.USER.name()));
         return author;
     }
 
@@ -132,8 +128,8 @@ public class ItemServiceTestUtils {
         user.setFirstName("User");
         user.setLastName("User");
 
-        user.setRoles(List.of(
-                new AuthorityEntity(Authority.USER.name())));
+        user.setRoles(
+                new AuthorityEntity(Authority.USER.name()));
         return user;
     }
 }

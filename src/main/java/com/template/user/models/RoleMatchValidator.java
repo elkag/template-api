@@ -1,4 +1,4 @@
-package com.template.user.model;
+package com.template.user.models;
 
 import com.template.user.entities.Authority;
 import org.springframework.beans.BeanWrapper;

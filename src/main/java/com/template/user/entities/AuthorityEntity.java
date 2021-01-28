@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,6 +31,12 @@ public class AuthorityEntity implements GrantedAuthority {
         this.role = role;
         return this;
     }
+
+    @ManyToOne(
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL)
+    @JoinColumn(name="user_id")
+    private UserEntity user;
 
     @Override
     public String getAuthority() {

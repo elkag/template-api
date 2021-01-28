@@ -15,7 +15,7 @@ public class PasswordEncoder implements org.springframework.security.crypto.pass
     return BCrypt.hashpw(plainTextPassword, salt);
   }
 
-  public boolean checkPassword(final String plainTextPassword, final String storedHash) {
+  public static boolean checkPassword(final String plainTextPassword, final String storedHash) {
     if (null == storedHash || !storedHash.startsWith("$2a$")) {
       throw new IllegalArgumentException("Invalid hash provided for comparison");
     }
