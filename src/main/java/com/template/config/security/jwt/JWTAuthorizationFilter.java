@@ -70,9 +70,6 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
                 }
             } finally {
                 if(!errorMessage.isEmpty() || !detailMessage.isEmpty()){
-                    System.out.println("requestURL: " + request.getRequestURL());
-                    System.out.println("requestURI: " + request.getRequestURI());
-                    System.out.println("servletPath: " + request.getServletPath());
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     byte[] body = new ObjectMapper()

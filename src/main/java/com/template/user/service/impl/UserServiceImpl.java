@@ -187,7 +187,6 @@ public class UserServiceImpl implements UserService {
         }
         Page<UserEntity> page = userRepository.fetchAuthors(pageable);
 
-        System.out.println(page);
         return PageDTO.builder()
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
@@ -304,7 +303,6 @@ public class UserServiceImpl implements UserService {
             AuthorityEntity userRoleAdmin = new AuthorityEntity().setRole(Authority.ADMIN.name());
             UserEntity updated = user.addRole(userRoleAdmin);
             UserEntity saved = userRepository.save(updated);
-            System.out.println(saved);
         });
 
         List<UserEntity> users = userRepository.findAllById(ids);
@@ -334,7 +332,6 @@ public class UserServiceImpl implements UserService {
             AuthorityEntity userRoleAdmin = new AuthorityEntity().setRole(Authority.ADMIN.name());
             UserEntity updated = user.addRole(userRoleAdmin);
             UserEntity saved = userRepository.save(updated);
-            System.out.println(saved);
         });
     }
 }
