@@ -121,17 +121,16 @@ public class AddItemServiceImpl implements AddItemService {
         toUpdate.setCategories(categories);
         toUpdate.setTags(tags);
 
-        boolean isCompleted = model.getName().isEmpty()
-                || model.getDescription().isEmpty()
-                || model.getLink().isEmpty()
-                || model.getNotes().isEmpty();
+        boolean isCompleted = model.getName() == null || model.getName().isEmpty()
+                            || model.getDescription() == null || model.getDescription().isEmpty()
+                            || model.getLink() == null || model.getLink().isEmpty()
+                            || model.getNotes() == null || model.getNotes().isEmpty();
 
         toUpdate.setApproved(isAdmin && isCompleted);
         toUpdate.setName(model.getName());
         toUpdate.setDescription(model.getDescription());
         toUpdate.setLink(model.getLink());
         toUpdate.setNotes(model.getNotes());
-
 
         Item saved = saveItem(toUpdate);
 
