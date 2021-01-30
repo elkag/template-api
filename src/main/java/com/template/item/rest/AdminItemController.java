@@ -1,9 +1,6 @@
 package com.template.item.rest;
 
-import com.template.item.models.ApproveItemRequest;
-import com.template.item.models.ItemDTO;
-import com.template.item.models.PageDTO;
-import com.template.item.models.ValuesAllowed;
+import com.template.item.models.*;
 import com.template.item.service.AddItemService;
 import com.template.item.service.ItemService;
 import com.template.user.entities.UserPrincipal;
@@ -42,23 +39,23 @@ public class AdminItemController extends BaseItemController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/approve")
+    @PutMapping("/approve")
     @ApiOperation(value = "Approve unapproved item",
             notes = "This method change the status of unapproved item to \"approved\"\n" +
                     "User with role SUPER_ADMIN can change the status of any item.\n" +
                     "User with role ADMIN can approve only his own items.\n" +
                     "User with role AUTHOR has no rights to approve items",
             authorizations = { @Authorization(value="jwtToken") })
-    public ResponseEntity<Set<ItemDTO>> approveItem(
+    public ResponseEntity<ApproveItemResponse> approveItem(
             @AuthenticationPrincipal final UserPrincipal principal,
             @RequestBody
             @Valid
             @ApiParam(
-                    name =  "changePasswordRequest",
+                    name =  "ApproveItemRequest",
                     value = "Set of ApproveItemRequest",
                     required = true)
             @NotEmpty Set<@Valid ApproveItemRequest> items) {
-        Set<ItemDTO> response = itemService.approve(principal, items);
+        ApproveItemResponse response = itemService.approve(principal, items);
         return ResponseEntity.ok(response);
     }
 

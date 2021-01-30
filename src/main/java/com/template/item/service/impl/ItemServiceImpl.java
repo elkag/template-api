@@ -193,7 +193,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public Set<ItemDTO> approve(UserPrincipal principal, Set<ApproveItemRequest> itemRequestSet) {
+    public ApproveItemResponse approve(UserPrincipal principal, Set<ApproveItemRequest> itemRequestSet) {
         boolean isSuperAdmin = principal.getUserEntity().getRoles().stream()
                 .map(AuthorityEntity::getRole)
                 .anyMatch((r -> r.equals(Authority.SUPER_ADMIN.name())));
@@ -201,22 +201,42 @@ public class ItemServiceImpl implements ItemService {
                 .map(AuthorityEntity::getRole)
                 .anyMatch((r -> r.equals(Authority.ADMIN.name())));
 
+        Set<Item> completed = itemRepository.fetchCompletedItems(itemRequestSet.stream().map(ApproveItemRequest::getId).collect(Collectors.toSet()));
+        Set<Long> completedIds = completed.stream().map(Item::getId).collect(Collectors.toSet());
+        long toApproveCount = itemRequestSet.size();
         if(isSuperAdmin) {
             itemRequestSet.forEach(itemRequest -> {
-                itemRepository.setApproved(itemRequest.getId(), itemRequest.getIsApproved());
+                if(itemRequest.getIsApproved()) {
+                    if(completedIds.contains(itemRequest.getId())){
+                        itemRepository.setApproved(itemRequest.getId(), true);
+                    }
+                } else {
+                    itemRepository.setApproved(itemRequest.getId(), false);
+                }
             });
         } else if(isAdmin){
             itemRequestSet.forEach(itemRequest -> {
-                itemRepository.setApproved(principal.getUserEntity().getId(), itemRequest.getId(), itemRequest.getIsApproved());
+                if(itemRequest.getIsApproved()) {
+                    if (completedIds.contains(itemRequest.getId())) {
+                        itemRepository.setApproved(principal.getUserEntity().getId(), itemRequest.getId(), true);
+                    }
+                } else {
+                    itemRepository.setApproved(principal.getUserEntity().getId(), itemRequest.getId(), false);
+                }
             });
         } else {
             throw new HttpUnauthorizedException("You have not authorized to approve items.");
         }
-        Set<Long> ids = itemRequestSet.stream().map(ApproveItemRequest::getId).collect(Collectors.toSet());
 
-        Set<Item> items = itemRepository.fetchByIds(ids);
+        Set<Item> items = itemRepository.fetchByIds(completedIds);
+        Set<ItemDTO> itemDTOSet = ItemMapper.INSTANCE.toItemDTOs(items);
 
-        return ItemMapper.INSTANCE.toItemDTOs(items);
+        boolean hasError = completed.size() < toApproveCount;
+        String message = "";
+        if(hasError) {
+            message = String.format("%d of the items are uncompleted, so that they are not approved.", toApproveCount - completed.size());
+        }
+        return new ApproveItemResponse().setItems(itemDTOSet).setError(hasError).setMessage(message);
     }
 
     @Override

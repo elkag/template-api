@@ -29,7 +29,7 @@ public interface ItemService {
     PageDTO getAll(int pageNumber, int pageSize, String orderBy, String direction);
 
     @Transactional
-    Set<ItemDTO> approve(UserPrincipal principal, Set<ApproveItemRequest> items);
+    ApproveItemResponse approve(UserPrincipal principal, Set<ApproveItemRequest> items);
 
     ItemDTO getItem(long id);
 

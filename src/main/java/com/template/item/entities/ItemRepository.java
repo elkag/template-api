@@ -9,9 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,6 +21,15 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "LEFT JOIN FETCH i.categories as c " +
             "WHERE i.id=:id")
     Optional<Item> fetchById(@Param("id") Long id);
+
+    @Transactional
+    @Query("SELECT i FROM Item as i " +
+            "WHERE i.name IS NOT NULL AND " +
+            "i.description IS NOT NULL AND " +
+            "i.link IS NOT NULL AND " +
+            "i.notes IS NOT NULL AND " +
+            "i.id IN (:ids)")
+    Set<Item> fetchCompletedItems(@Param("ids") Set<Long> ids);
 
     @Query("SELECT i FROM Item as i " +
             "JOIN FETCH i.user as u " +

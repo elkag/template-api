@@ -54,7 +54,7 @@ public class AddItemServiceImpl implements AddItemService {
                 .anyMatch(r -> r.getAuthority().equals(Authority.ADMIN.name()));
 
         item.setUser(userEntity);
-        item.setApproved(isAdmin);
+        item.setApproved(false);
         item.setCategories(Set.of());
         item.setTags(Set.of());
 
@@ -94,7 +94,7 @@ public class AddItemServiceImpl implements AddItemService {
         Item item = ItemMapper.INSTANCE.toItem(model);
 
         if(Objects.isNull(model.getId())){
-            log.warn(String.format("USER_%d: -> ITEM_%d does not exist", itemOwner.getId(), model.getId()));
+            log.error(String.format("USER_%d: -> ITEM_%d does not exist", itemOwner.getId(), model.getId()));
             throw new EntityNotFoundException();
         }
 
@@ -116,15 +116,22 @@ public class AddItemServiceImpl implements AddItemService {
         boolean isAdmin = itemOwner.getRoles().stream()
                 .anyMatch(r -> r.getAuthority().equals(Authority.ADMIN.name()));
 
-        toUpdate.setApproved(isAdmin);
-        toUpdate.setName(model.getName());
-        toUpdate.setDescription(model.getDescription());
-        toUpdate.setLink(model.getLink());
-        toUpdate.setNotes(model.getNotes());
         Set<Category> categories = saveCategoriesIfNotExist(item.getCategories());
         Set<Tag> tags = saveTagsIfNotExist(item.getTags());
         toUpdate.setCategories(categories);
         toUpdate.setTags(tags);
+
+        boolean isCompleted = model.getName().isEmpty()
+                || model.getDescription().isEmpty()
+                || model.getLink().isEmpty()
+                || model.getNotes().isEmpty();
+
+        toUpdate.setApproved(isAdmin && isCompleted);
+        toUpdate.setName(model.getName());
+        toUpdate.setDescription(model.getDescription());
+        toUpdate.setLink(model.getLink());
+        toUpdate.setNotes(model.getNotes());
+
 
         Item saved = saveItem(toUpdate);
 
