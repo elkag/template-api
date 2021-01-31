@@ -30,7 +30,7 @@ public class Item {
 
     @Field
     @Column(name="name", nullable = false)
-    @Size(max=100)
+    @Size(max=100, message = "Item name must be between 0 and 1000 characters")
     private String name;
 
     @Field
@@ -43,7 +43,7 @@ public class Item {
     private String notes;
 
     @Column(name="link", nullable = false)
-    @Size(max=100)
+    @Size(max=100, message = "Link must be between 0 and 1000 characters")
     private String link;
 
     @Field

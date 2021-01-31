@@ -33,13 +33,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
         return new UserPrincipal(userOpt.get());
     }
-
-    private UserEntity map(UserEntity userEntity) {
-        //TODO: think about this...?!
-        List<GrantedAuthority> authorities = userEntity.getRoles().stream()
-                .map(r -> new SimpleGrantedAuthority(r.getRole()))
-                .collect(Collectors.toList());
-
-        return userEntity;
-    }
 }

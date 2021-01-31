@@ -71,6 +71,15 @@ public class UserEntity {
     return this;
   }
 
+
+  public UserEntity addRole(final AuthorityEntity role) {
+    if(this.roles.stream().filter(r -> r.getRole().equals(role.getRole())).findAny().isEmpty()){
+      role.setUser(this);
+      this.roles.add(role);
+    }
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -87,11 +96,4 @@ public class UserEntity {
     return Objects.hash(id, username, firstName, lastName, image);
   }
 
-  public UserEntity addRole(final AuthorityEntity role) {
-    if(this.roles.stream().filter(r -> r.getRole().equals(role.getRole())).findAny().isEmpty()){
-      role.setUser(this);
-      this.roles.add(role);
-    }
-    return this;
-  }
 }
