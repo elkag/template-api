@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({HibernateSearchConfig.class, SpringSecurityTestConfig.class})
 class AdminItemControllerTest extends ItemControllerTestBase {
 
-    @Autowired
+   /* @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -114,5 +114,5 @@ class AdminItemControllerTest extends ItemControllerTestBase {
     @Override
     public void tearDown(){
        super.tearDown();
-    }
+    }*/
 }

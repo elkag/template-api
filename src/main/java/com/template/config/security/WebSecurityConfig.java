@@ -64,11 +64,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
         .authorizeRequests()
             .antMatchers(HttpMethod.POST, USERS_LOGIN_URL, USERS_REGISTER_URL)
-            .permitAll()
+              .permitAll()
             .antMatchers(HttpMethod.GET, GET_ITEM_URL, GET_ALL_ITEMS_URL, SEARCH_ITEMS_URL, SWAGGER_UI_URL)
-            .permitAll()
+              .permitAll()
             .anyRequest().authenticated()
-            .and().sessionManagement()
+            .and()
+            .sessionManagement()
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
     http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

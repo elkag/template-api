@@ -11,7 +11,6 @@ import com.template.tag.entity.Tag;
 import com.template.tag.service.TagService;
 import com.template.user.entities.Authority;
 import com.template.user.entities.UserEntity;
-import com.template.user.entities.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +38,7 @@ class AddItemServiceTest {
 
     Map<Authority, UserEntity> usersMap;
 
-    /*@BeforeEach
+   @BeforeEach
     public void setup(){
 
         usersMap = ItemServiceTestUtils.getUsers();
@@ -57,16 +56,16 @@ class AddItemServiceTest {
 
         when(mockItemRepository.findById(1L)).thenReturn(Optional.of(ItemServiceTestUtils.getItemWith2Categories2Tags()));
 
-        assertThrows(IllegalArgumentException.class, () -> addItemService.addItem(itemDTO, new UserPrincipal(usersMap.get(Authority.AUTHOR))));
+        assertThrows(IllegalArgumentException.class, () -> addItemService.addItem(itemDTO, usersMap.get(Authority.AUTHOR)));
     }
 
-    @Test
+     @Test
     void addAuthorsItemTest_ExpectNotApproved() {
         ItemDTO itemDTO = ItemServiceTestUtils.getItemDTO();
         UserEntity user = usersMap.get(Authority.AUTHOR);
         setupMocks_forAddItemTests();
 
-        Item saved = addItemService.addItem(itemDTO, new UserPrincipal(user));
+        Item saved = addItemService.addItem(itemDTO, user);
 
         assertFalse(saved.isApproved());
     }
@@ -77,7 +76,7 @@ class AddItemServiceTest {
         UserEntity user = usersMap.get(Authority.ADMIN);
         setupMocks_forAddItemTests();
 
-        Item saved = addItemService.addItem(itemDTO, new UserPrincipal(user));
+        Item saved = addItemService.addItem(itemDTO, user);
 
         assertTrue(saved.isApproved());
     }
@@ -88,7 +87,7 @@ class AddItemServiceTest {
         UserEntity user = usersMap.get(Authority.AUTHOR);
         setupMocks_forAddItemTests();
 
-        Item saved = addItemService.addItem(itemDTO, new UserPrincipal(user));
+        Item saved = addItemService.addItem(itemDTO, user);
 
         assertFalse(saved.isApproved());
     }
@@ -99,7 +98,7 @@ class AddItemServiceTest {
         UserEntity user = usersMap.get(Authority.ADMIN);
         setupMocks_forAddItemTests();
 
-        Item saved = addItemService.addItem(itemDTO, new UserPrincipal(user));
+        Item saved = addItemService.addItem(itemDTO, user);
 
         assertNotNull(saved.getId());
         assertEquals(itemDTO.getName(), saved.getName());
@@ -127,5 +126,5 @@ class AddItemServiceTest {
             ((Item) invocation.getArgument(0)).setId(1L);
             return (Item) invocation.getArgument(0);
         });
-    }*/
+    }
 }

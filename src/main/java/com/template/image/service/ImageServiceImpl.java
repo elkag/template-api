@@ -10,6 +10,7 @@ import com.template.item.entities.Item;
 import com.template.item.entities.ItemRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -55,15 +56,17 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void deleteImages(Item item, List<ImageDto> imageDtos) {
-        log.info("Delete {} images from ITEM_{} BEGIN", imageDtos.size(), item.getId());
+    @Transactional
+    public void deleteImage(final Long itemId, final Long imageId) {
+        log.info("Delete IMAGE_{} from ITEM_{} BEGIN", imageId, itemId);
 
-        List<Long> ids = imageDtos.stream().map(ImageDto::getId).collect(Collectors.toList());
-        List<Image> images = imageRepository.fetchImagesByItem(item).stream()
-                .filter(img -> ids.contains(img.getId()))
-                .collect(Collectors.toList());
-        imageRepository.deleteAll(images);
-        log.info("Delete {} images from ITEM_{} BEGIN", imageDtos.size(), item.getId());
+        List<Image> images = imageRepository.fetchImageByItemId(itemId, imageId);
+        if(images.isEmpty()) {
+            throw new EntityNotFoundException("Image not found");
+        }
+
+        destroyImage(images.get(0));
+        log.info("Delete IMAGE_{} from ITEM_{} END", imageId, itemId);
     }
 
     @Override
