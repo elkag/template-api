@@ -23,6 +23,7 @@ import javax.persistence.EntityManager;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({HibernateSearchConfig.class, SpringSecurityTestConfig.class})
 class AdminItemControllerTest extends ItemControllerTestBase {
 
-   /* @Autowired
+    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -56,47 +57,42 @@ class AdminItemControllerTest extends ItemControllerTestBase {
     }
 
     @Test
-    @WithUserDetails(value = "admin", userDetailsServiceBeanName = "userDetailsService")
-    @Transactional
-    void addItemByAdminTest_ExpectApproved() throws Exception {
-
-        ItemDTO itemDTO = ItemServiceTestUtils.getItemDTO();
-
-        mockMvc.perform(post("/items/add").
-                contentType(MediaType.APPLICATION_JSON).
-                content(objectMapper.writeValueAsString(itemDTO)).
-                accept(MediaType.APPLICATION_JSON)).
-                andExpect(status().isCreated()).
-                andExpect(jsonPath("$.link", is(itemDTO.getLink()))).
-                andExpect(jsonPath("$.name", is(itemDTO.getName()))).
-                andExpect(jsonPath("$.description", is(itemDTO.getDescription()))).
-                andExpect(jsonPath("$.notes", is(itemDTO.getNotes()))).
-                andExpect(jsonPath("$.categories", hasSize(2))).
-                andExpect(jsonPath("$.tags", hasSize(2))).
-                andExpect(jsonPath("$.approved", is(true)));
-    }
-
-    @Test
     @WithUserDetails(value = "superadmin", userDetailsServiceBeanName = "userDetailsService")
     @Transactional
     void approveItem() throws Exception {
 
-        mockMvc.perform(post("/items/admin/approve").
-                param("id", String.valueOf(AUTHOR_ITEM.getId())).
+        String request =    "[" +
+                                "{" +
+                                    "\"id\": "+ AUTHOR_ITEM.getId() + ", \"isApproved\": true" +
+                                "}" +
+                            "]";
+
+        mockMvc.perform(put("/items/admin/approve").
+                contentType(MediaType.APPLICATION_JSON).
+                content(request).
                 accept(MediaType.APPLICATION_JSON)).
                 andExpect(status().isOk()).
-                andExpect(jsonPath("$.approved", is(true)));
+                andExpect(jsonPath("$.error", is(false))).
+                andExpect(jsonPath("$.items", hasSize(1)));
     }
 
     @Test
     @WithUserDetails(value = "admin", userDetailsServiceBeanName = "userDetailsService")
     @Transactional
-    void approveItemByAdmin_ExpectError() throws Exception {
+    void approveItemByAdmin_ExpectNotApproved() throws Exception {
+        String request =    "[" +
+                                "{" +
+                                    "\"id\": "+ AUTHOR_ITEM.getId() + ", \"isApproved\": true" +
+                                "}" +
+                            "]";
 
-        mockMvc.perform(post("/items/admin/approve").
-                param("id", String.valueOf(AUTHOR_ITEM.getId())).
+        mockMvc.perform(put("/items/admin/approve").
+                contentType(MediaType.APPLICATION_JSON).
+                content(request).
                 accept(MediaType.APPLICATION_JSON)).
-                andExpect(status().isForbidden());
+                andExpect(status().isOk()).
+                andExpect(jsonPath("$.items", hasSize(1))).
+                andExpect(jsonPath("$.items[0].approved", is(false)));
     }
 
     @Test
@@ -104,15 +100,23 @@ class AdminItemControllerTest extends ItemControllerTestBase {
     @Transactional
     void approveItemByAdmin_ExpectStatusNoContent() throws Exception {
         final String nonExistingItemID = "1897";
-        mockMvc.perform(post("/items/admin/approve").
-                param("id", nonExistingItemID).
+        String request ="[" +
+                            "{" +
+                                "\"id\": "+ nonExistingItemID + ", \"isApproved\": true" +
+                            "}" +
+                        "]";
+        mockMvc.perform(put("/items/admin/approve").
+                contentType(MediaType.APPLICATION_JSON).
+                content(request).
                 accept(MediaType.APPLICATION_JSON)).
-                andExpect(status().isNoContent());
+                andExpect(status().isOk()).
+                andExpect(jsonPath("$.error", is(true))).
+                andExpect(jsonPath("$.items", hasSize(0)));
     }
 
     @AfterEach
     @Override
     public void tearDown(){
        super.tearDown();
-    }*/
+    }
 }

@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({HibernateSearchConfig.class, SpringSecurityTestConfig.class})
 class ItemControllerTest extends ItemControllerTestBase {
 
-   /* @Autowired
+    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -90,7 +90,7 @@ class ItemControllerTest extends ItemControllerTestBase {
                 contentType(MediaType.APPLICATION_JSON).
                 content(objectMapper.writeValueAsString(itemDTO)).
                 accept(MediaType.APPLICATION_JSON)).
-                andExpect(status().isNoContent());
+                andExpect(status().isNotFound());
     }
 
     @Test
@@ -179,5 +179,5 @@ class ItemControllerTest extends ItemControllerTestBase {
     @AfterEach
     public void tearDown(){
         super.tearDown();
-    }*/
+    }
 }
